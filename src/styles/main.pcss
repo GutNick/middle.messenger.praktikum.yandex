@@ -1,0 +1,107 @@
+@import url("normalize.pcss");
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,500&display=swap');
+
+* {
+    --primaryBackgroundColor: #fff;
+    --primaryColor: #1e1e1e;
+    --secondaryColor: #3369f3;
+    --spanishGrayColor: #999;
+    --whiteColor: #fff;
+
+    font-family: "Inter", Arial, sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    box-sizing: border-box;
+}
+.page {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--primaryBackgroundColor);
+    color: var(--primaryColor);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.button {
+    background: var(--secondaryColor);
+    border: none;
+    color: var(--whiteColor);
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    max-width: 280px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.link {
+    color: var(--secondaryColor);
+    font-size: 11px;
+    text-decoration: none;
+}
+
+.input {
+    border: unset;
+    border-bottom: 1px solid var(--secondaryColor);
+    padding: 0 0 6px;
+    color: var(--primaryColor);
+    font-size: 13px;
+    outline: none;
+}
+
+.sign-form {
+    padding: 50px 30px 30px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, .14);
+    border-radius: 12px;
+    width: 340px;
+
+    &__title {
+        text-align: center;
+        margin: 0 0 40px;
+        font-size: 20px;
+    }
+
+    &__form {
+        display: flex;
+        flex-direction: column;
+        min-height: 310px;
+    }
+
+    &__label {
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+        color: var(--spanishGrayColor);
+        font-size: 9px;
+        line-height: 9px;
+        row-gap: 8px;
+        cursor: text;
+
+        &:last-of-type {
+            margin-bottom: 62px;
+        }
+
+        &_active > &-text {
+            font-size: 9px;
+            top: 0;
+        }
+    }
+
+    &__label-text {
+        font-size: 13px;
+        position: relative;
+        top: 21px;
+        transition: top .3s linear, font-size .3s linear;
+    }
+
+    &__actions {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 14px;
+    }
+}
