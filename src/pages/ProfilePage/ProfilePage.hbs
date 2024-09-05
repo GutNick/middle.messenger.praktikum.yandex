@@ -1,0 +1,35 @@
+<div class="page page_sidebar page_path_profile">
+    {{> Sidebar}}
+    <div class="profile">
+        <div class="profile__wrapper">
+            <div class="profile__avatar-wrapper">
+                {{> Avatar class="profile__avatar" src=userData.avatar }}
+                {{> Button id="avatar-button" type="button" text="Поменять аватар" class="profile__avatar-button" }}
+            </div>
+            <p class="profile__user-name">{{userData.display_name}}</p>
+            <form class="profile__form">
+                {{#if isChangingPassword}}
+                    {{> Input id="oldPassword" class="profile" label="Старый пароль" type="password" name="oldPassword" readonly=isDisabled }}
+                    {{> Input id="newPassword" class="profile" label="Новый пароль" type="password" name="newPassword" readonly=isDisabled }}
+                    {{> Input id="repeatPassword" class="profile" label="Повторите новый пароль" type="password" readonly=isDisabled }}
+                {{^}}
+                    {{> Input id="email" class="profile" label="Почта" type="email" value=userData.email name="email" readonly=isDisabled }}
+                    {{> Input id="login" class="profile" label="Логин" type="text" value=userData.login name="login" readonly=isDisabled }}
+                    {{> Input id="first_name" class="profile" label="Имя" type="text" value=userData.first_name name="first_name" readonly=isDisabled }}
+                    {{> Input id="second_name" class="profile" label="Фамилия" type="text" value=userData.second_name name="second_name" readonly=isDisabled }}
+                    {{> Input id="display_name" class="profile" label="Имя в чате" type="text" value=userData.display_name name="display_name" readonly=isDisabled }}
+                    {{> Input id="phone" class="profile" label="Телефон" type="tel" value=userData.phone name="phone" readonly=isDisabled }}
+                {{/if}}
+                <div class="profile__actions">
+                    {{#if isEditingProfile}}
+                        {{> Button id="submit" type="submit" text="Сохранить" class="profile__submit-button" }}
+                    {{^}}
+                        {{> Link href="#" class="profile__link" dataAction="isEditingProfile" text="Изменить данные"}}
+                        {{> Link href="#" class="profile__link" dataAction="isEditingProfile isChangingPassword" text="Изменить пароль"}}
+                        {{> Link href="#" class="profile__link" dataPage="/signIn" text="Выйти"}}
+                    {{/if}}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
