@@ -6,6 +6,10 @@
 ## Макет 
 [Figma](https://www.figma.com/design/9YbDsRCVUj6INRyaHaffFO/Chat_external_link)
 
+## Netlify
+
+[Messenger](https://charming-lolly-fcd870.netlify.app/)
+
 ## Установка и запуск
 Склонируйте репозиторий  
 `git clone https://github.com/GutNick/middle.messenger.praktikum.yandex.git`
