@@ -2,18 +2,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,500..600&display=swap');
 
 * {
-    --primaryBackgroundColor: #fff;
-    --primaryColor: #1e1e1e;
-    --secondaryColor: #3369f3;
-    --accentColor: #ff0000;
-    --spanishGrayColor: #999;
-    --whiteColor: #fff;
-    --lotionColor: #fbfbfb;
-    --brightGrayColor: #eaeaea;
-    --brightGrayColor2: #efefef;
-    --sideBarWidth: 0;
+    --primary-background-color: #fff;
+    --primary-color: #1e1e1e;
+    --secondary-color: #3369f3;
+    --accent-color: #f00;
+    --spanish-gray-color: #999;
+    --white-color: #fff;
+    --lotion-color: #fbfbfb;
+    --bright-gray-color: #eaeaea;
+    --bright-gray-color-2: #efefef;
+    --side-bar-width: 0;
 
-    font-family: "Inter", Arial, sans-serif;
+    font-family: Inter, Arial, sans-serif;
     font-optical-sizing: auto;
     font-weight: 500;
     font-style: normal;
@@ -23,8 +23,8 @@
 .page {
     width: 100%;
     min-height: 100vh;
-    background: var(--primaryBackgroundColor);
-    color: var(--primaryColor);
+    background: var(--primary-background-color);
+    color: var(--primary-color);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -32,21 +32,22 @@
 
     &_sidebar {
         display: grid;
-        grid-template-columns: var(--sideBarWidth) 1fr;
+        grid-template-columns: var(--side-bar-width) 1fr;
     }
 
     &_path {
         &_profile {
-            --sideBarWidth: 64px;
-            padding: 0 var(--sideBarWidth) 0 0;
+            --side-bar-width: 64px;
+
+            padding: 0 var(--side-bar-width) 0 0;
         }
     }
 }
 
 .button {
-    background: var(--secondaryColor);
+    background: var(--secondary-color);
     border: none;
-    color: var(--whiteColor);
+    color: var(--white-color);
     border-radius: 8px;
     padding: 12px;
     width: 100%;
@@ -56,29 +57,29 @@
 }
 
 .link {
-    color: var(--secondaryColor);
+    color: var(--secondary-color);
     font-size: 11px;
     text-decoration: none;
 }
 
 .input {
     border: unset;
-    border-bottom: 1px solid var(--secondaryColor);
+    border-bottom: 1px solid var(--secondary-color);
     padding: 0 0 6px;
-    color: var(--primaryColor);
+    color: var(--primary-color);
     font-size: 13px;
     outline: none;
 }
 
 .avatar {
     border-radius: 50%;
-    background: var(--brightGrayColor2);
+    background: var(--bright-gray-color-2);
     overflow: hidden;
 }
 
 .sign-form {
     padding: 50px 30px 30px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, .14);
+    box-shadow: 0 0 6px rgb(0 0 0 / 14%);
     border-radius: 12px;
     width: 340px;
 
@@ -94,11 +95,18 @@
         min-height: 310px;
     }
 
+    &__label-text {
+        font-size: 13px;
+        position: relative;
+        top: 21px;
+        transition: top .3s linear, font-size .3s linear;
+    }
+
     &__label {
         margin-bottom: 16px;
         display: flex;
         flex-direction: column;
-        color: var(--spanishGrayColor);
+        color: var(--spanish-gray-color);
         font-size: 9px;
         line-height: 9px;
         row-gap: 8px;
@@ -112,13 +120,6 @@
             font-size: 9px;
             top: 0;
         }
-    }
-
-    &__label-text {
-        font-size: 13px;
-        position: relative;
-        top: 21px;
-        transition: top .3s linear, font-size .3s linear;
     }
 
     &__actions {
@@ -135,8 +136,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--lotionColor);
-    border-right: 1px solid var(--brightGrayColor);
+    background: var(--lotion-color);
+    border-right: 1px solid var(--bright-gray-color);
 
     &__link {
         display: flex;
@@ -159,6 +160,20 @@
         align-items: center;
     }
 
+    &__avatar-button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: rgb(0 0 0 / 50%);
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity .2s linear;
+        max-width: 100%;
+    }
+
     &__avatar-wrapper {
         position: relative;
         border-radius: 50%;
@@ -170,20 +185,6 @@
                 opacity: 1;
             }
         }
-    }
-
-    &__avatar-button {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, .5);
-        visibility: hidden;
-        opacity: 0;
-        transition: opacity .2s linear;
-        max-width: 100%;
     }
 
     &__avatar {
@@ -210,7 +211,7 @@
     }
 
     &__label {
-        border-bottom: 1px solid var(--brightGrayColor);
+        border-bottom: 1px solid var(--bright-gray-color);
         display: flex;
 
         &:last-of-type {
@@ -227,7 +228,7 @@
         border-bottom: none;
         text-align: right;
         padding: 0 0 10px 20px;
-        color: var(--spanishGrayColor);
+        color: var(--spanish-gray-color);
     }
 
     &__actions {
@@ -241,10 +242,10 @@
     &__link {
         font-size: 13px;
         padding: 0 0 10px;
-        border-bottom: 1px solid var(--brightGrayColor);
+        border-bottom: 1px solid var(--bright-gray-color);
 
         &:last-child {
-            color: var(--accentColor);
+            color: var(--accent-color);
             border-bottom: none;
         }
     }
