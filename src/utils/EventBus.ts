@@ -1,6 +1,6 @@
 class EventBus {
 
-	private readonly _listeners: Record<string, Array<(args?: unknown[]) => void>>;
+	private readonly _listeners: Record<string, Array<(args?: unknown) => void>>;
 
 	constructor() {
 		this._listeners = {};
@@ -30,7 +30,7 @@ class EventBus {
 		}
 
 		this._listeners[event].forEach(function(listener) {
-			listener([...args]);
+			listener(...args);
 		});
 	}
 }
