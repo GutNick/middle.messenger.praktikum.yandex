@@ -11,7 +11,8 @@
     "prebuild": "tsc --noEmit",
     "build": "npm run prebuild && vite build",
     "preview": "vite preview",
-    "start": "npm run build && node server.cjs"
+    "start": "npm run build && node server.cjs",
+    "lint": "npx eslint ."
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
