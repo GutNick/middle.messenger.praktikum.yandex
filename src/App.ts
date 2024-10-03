@@ -49,86 +49,11 @@ class App {
 				this.appElement.replaceChildren(errorPage.getContent());
 			}
 		}
-
-		// if (this.appElement) {
-		//   let template;
-		//   if (this.state[stateKeys.CURRENT_PAGE] === '/signIn') {
-		//     template = Handlebars.compile(Pages.SignPage);
-		//     this.appElement.innerHTML = template({...SIGN_IN_PAGE_PROPS});
-		//   } else if (this.state[stateKeys.CURRENT_PAGE] === '/signUp') {
-		//     template = Handlebars.compile(Pages.SignPage);
-		//     this.appElement.innerHTML = template({...SIGN_UP_PAGE_PROPS});
-		//   } else if (this.state[stateKeys.CURRENT_PAGE] === '/') {
-		//     template = Handlebars.compile(Pages.ChatPage);
-		//     this.appElement.innerHTML = template({});
-		//   } else if (this.state[stateKeys.CURRENT_PAGE] === '/profile') {
-		//     template = Handlebars.compile(Pages.ProfilePage);
-		//     this.appElement.innerHTML = template({
-		//       isDisabled: !this.state[stateKeys.IS_EDITING_PROFILE],
-		//       isEditingProfile: this.state[stateKeys.IS_EDITING_PROFILE],
-		//       isChangingPassword: this.state[stateKeys.IS_CHANGING_PASSWORD],
-		//       userData
-		//     });
-		//   } else if (this.state[stateKeys.CURRENT_PAGE] === '/404') {
-		//     template = Handlebars.compile(Pages.ErrorPage);
-		//     this.appElement.innerHTML = template({errorCode: '404', errorDescription: 'Не туда попали'});
-		//   } else if (this.state[stateKeys.CURRENT_PAGE] === '/500') {
-		//     template = Handlebars.compile(Pages.ErrorPage);
-		//     this.appElement.innerHTML = template({errorCode: '500', errorDescription: 'Мы уже фиксим'});
-		//   }
-		//   this.attachEventListeners()
-		// } else {
-		//   throw new Error('Нет родительского блока')
-		// }
-	}
-
-	attachEventListeners() {
-		const submitButton = document.getElementById('submit');
-		if (this.state[stateKeys.CURRENT_PAGE] === '/signIn' || this.state[stateKeys.CURRENT_PAGE] === '/signUp') {
-			if (submitButton) {
-				submitButton.addEventListener('click', (e) => {
-					e.preventDefault();
-					this.changePage('/');
-				})
-			}
-		}
-		if (this.state[stateKeys.CURRENT_PAGE] === '/profile') {
-			if (submitButton) {
-				submitButton.addEventListener('click', (e) => {
-					e.preventDefault();
-					this.state[stateKeys.IS_EDITING_PROFILE] = false
-					this.state[stateKeys.IS_CHANGING_PASSWORD] = false
-					this.render();
-				})
-			}
-		}
-		const links: NodeListOf<HTMLAnchorElement> = document.querySelectorAll('.link');
-		links.forEach((link: HTMLAnchorElement) => {
-			link.addEventListener('click', (e: MouseEvent) => {
-				e.preventDefault();
-				const target = e.target as HTMLAnchorElement;
-				if (target.dataset?.page) {
-					this.changePage(target.dataset.page);
-				} else if (target.dataset.action) {
-					this.handleAction(target.dataset.action)
-				}
-			});
-		});
 	}
 
 	changePage(page: string) {
 		this.state[stateKeys.CURRENT_PAGE] = page;
 		this.setPageRoute(page);
-		this.render();
-	}
-
-	handleAction(action: string) {
-		const params = action.split(" ")
-		params.forEach(param => {
-			if (param === stateKeys.IS_EDITING_PROFILE || param === stateKeys.IS_CHANGING_PASSWORD) {
-				this.state[param] = !this.state[param];
-			}
-		})
 		this.render();
 	}
 
