@@ -59,6 +59,18 @@ class Block {
 		});
 	}
 
+	private _removeEvents() {
+		const { events = {} } = this.props;
+
+		(Object.keys(events) as Array<keyof HTMLElementEventMap>).forEach(eventName => {
+			const eventHandler = events[eventName];
+
+			if (this._element && eventHandler) {
+				this._element.removeEventListener(eventName, eventHandler);
+			}
+		});
+	}
+
 	private _registerEvents(eventBus: EventBus) {
 		eventBus.on(Block.EVENTS.INIT, this._init.bind(this));
 		eventBus.on(Block.EVENTS.FLOW_CDM, this._componentDidMount.bind(this));
@@ -251,18 +263,6 @@ class Block {
 		if (content) {
 			content.style.display = 'none';
 		}
-	}
-
-	private _removeEvents() {
-		const { events = {} } = this.props;
-
-		(Object.keys(events) as Array<keyof HTMLElementEventMap>).forEach(eventName => {
-			const eventHandler = events[eventName];
-
-			if (this._element && eventHandler) {
-				this._element.removeEventListener(eventName, eventHandler);
-			}
-		});
 	}
 }
 
