@@ -6,7 +6,7 @@ import {Link} from "../../components/Link/Link";
 
 export class RegisterPage extends Block {
 	static title = 'Регистрация';
-	constructor(changePage: (page: string) => void) {
+	constructor() {
 		super({
 			title: RegisterPage.title,
 			EmailLabel: new Label({
@@ -202,7 +202,7 @@ export class RegisterPage extends Block {
 					const isFormValid = this.checkFormValidity(true)
 					if (isFormValid) {
 						console.log(data)
-						changePage('/chats')
+						// changePage('/chats')
 					}
 				}
 			}),
@@ -214,7 +214,7 @@ export class RegisterPage extends Block {
 					e.preventDefault();
 					const target = e.target as HTMLAnchorElement;
 					if (target.dataset?.page) {
-						changePage(target.dataset.page);
+						// changePage(target.dataset.page);
 					}
 				}
 			})

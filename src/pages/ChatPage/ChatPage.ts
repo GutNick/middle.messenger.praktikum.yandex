@@ -24,7 +24,7 @@ const chats: IChatListItemProps[] = [
 ]
 
 export class ChatPage extends Block {
-	constructor(changePage: (page: string) => void) {
+	constructor() {
 
 		const ChatItems = chats.map((item) => {
 			return new ChatListItem({
@@ -56,7 +56,7 @@ export class ChatPage extends Block {
 					e.preventDefault();
 					const target = e.target as HTMLAnchorElement;
 					if (target.dataset?.page) {
-						changePage(target.dataset.page);
+						// changePage(target.dataset.page);
 					}
 				}
 			}),

@@ -105,7 +105,7 @@ class Block {
 	}
 
 	componentDidUpdate(oldProps: Props, newProps: Props): boolean {
-		console.debug(this, oldProps, newProps);
+		console.debug(oldProps, newProps);
 		return true;
 	}
 

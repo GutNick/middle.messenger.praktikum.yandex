@@ -6,7 +6,7 @@ import {Link} from "../../components/Link/Link";
 
 export class SignPage extends Block {
 	static title = 'Вход';
-	constructor(changePage: (page: string) => void) {
+	constructor() {
 		super({
 			title: SignPage.title,
 			LoginLabel: new Label({
@@ -73,7 +73,7 @@ export class SignPage extends Block {
 					const isFormValid = this.checkFormValidity(true)
 					if (isFormValid) {
 						console.log(data)
-						changePage('/chats')
+						// changePage('/chats')
 					}
 				}
 			}),
@@ -85,7 +85,7 @@ export class SignPage extends Block {
 					e.preventDefault();
 					const target = e.target as HTMLAnchorElement;
 					if (target.dataset?.page) {
-						changePage(target.dataset.page);
+						// changePage(target.dataset.page);
 					}
 				}
 			})

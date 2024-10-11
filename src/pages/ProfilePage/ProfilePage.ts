@@ -1,10 +1,11 @@
 import Block from "../../utils/Block";
-import {Sidebar} from "../../components/Sidebar/Sidebar";
+// import {Sidebar} from "../../components/Sidebar/Sidebar";
 import {Avatar} from "../../components/Avatar/Avatar";
 import {Button} from "../../components/Button/Button";
 import {Label} from "../../components/Label/Label";
 import {getFormData, validateForm} from "../../utils/helpers";
 import {Link} from "../../components/Link/Link";
+import {userData} from "../../mockData";
 
 enum stateKeys {
 	IS_EDITING_PROFILE = "isEditingProfile",
@@ -18,14 +19,14 @@ export class ProfilePage extends Block {
 			message: ' ',
 		}
 	}
-	private readonly changePage: (page: string) => void;
+	// private readonly changePage: (page: string) => void;
 	private isChangingPassword: boolean;
 	private isEditingProfile: boolean;
 
-	constructor(changePage: (page: string) => void, userData: Record<string, string>) {
+	constructor() {
 		super({
 			...userData,
-			Sidebar: new Sidebar(changePage),
+			// Sidebar: new Sidebar(changePage),
 			Avatar: new Avatar({
 				className: 'profile__avatar',
 				src: userData.avatar
@@ -216,7 +217,7 @@ export class ProfilePage extends Block {
 			isChangingPassword: false,
 			isEditingProfile: false,
 		});
-		this.changePage = changePage
+		// this.changePage = changePage
 		this.isChangingPassword = false
 		this.isEditingProfile = false
 	}
@@ -255,7 +256,7 @@ export class ProfilePage extends Block {
 	handleLinkClick(e: MouseEvent) {
 		const target = e.target as HTMLAnchorElement;
 		if (target.dataset?.page) {
-			this.changePage(target.dataset.page);
+			// this.changePage(target.dataset.page);
 		} else if (target.dataset.action) {
 			const params = target.dataset.action.split(" ")
 			params.forEach(param => {
