@@ -3,6 +3,7 @@ import {Link} from "../../components/Link/Link";
 import {Label} from "../../components/Label/Label";
 import {ChatListItem, IChatListItemProps} from "../../components/ChatListItem/ChatListItem";
 import {ChatContent} from "../../components/ChatContent/ChatContent";
+import router from "../../utils/Router";
 
 const chats: IChatListItemProps[] = [
 	{
@@ -49,14 +50,14 @@ export class ChatPage extends Block {
 		super({
 			ProfileLink: new Link({
 				href: '#',
-				dataPage: '/profile',
+				dataPage: '/settings',
 				text: 'Профиль',
 				className: 'chats__link',
 				onClick: (e: MouseEvent) => {
 					e.preventDefault();
 					const target = e.target as HTMLAnchorElement;
 					if (target.dataset?.page) {
-						// changePage(target.dataset.page);
+						router.go(target.dataset.page)
 					}
 				}
 			}),

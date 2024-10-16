@@ -3,6 +3,7 @@ import {Label} from "../../components/Label/Label";
 import {getFormData, validateForm} from "../../utils/helpers";
 import {Button} from "../../components/Button/Button";
 import {Link} from "../../components/Link/Link";
+import router from "../../utils/Router";
 
 export class RegisterPage extends Block {
 	static title = 'Регистрация';
@@ -202,19 +203,19 @@ export class RegisterPage extends Block {
 					const isFormValid = this.checkFormValidity(true)
 					if (isFormValid) {
 						console.log(data)
-						// changePage('/chats')
+						router.go('/messenger')
 					}
 				}
 			}),
 			LoginLink: new Link({
 				href: '#',
-				dataPage: '/signIn',
+				dataPage: '/',
 				text: 'Войти',
 				onClick: (e: MouseEvent) => {
 					e.preventDefault();
 					const target = e.target as HTMLAnchorElement;
 					if (target.dataset?.page) {
-						// changePage(target.dataset.page);
+						router.go(target.dataset.page)
 					}
 				}
 			})

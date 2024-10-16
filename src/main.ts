@@ -8,5 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		.use('/sign-up', Pages.RegisterPage)
 		.use('/settings', Pages.ProfilePage)
 		.use('/messenger', Pages.ChatPage)
+		.use('/settings', Pages.ProfilePage)
 		.start()
 });

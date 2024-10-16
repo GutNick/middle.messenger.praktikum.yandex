@@ -1,5 +1,5 @@
 import Block from "../../utils/Block";
-// import {Sidebar} from "../../components/Sidebar/Sidebar";
+import {Sidebar} from "../../components/Sidebar/Sidebar";
 import {Avatar} from "../../components/Avatar/Avatar";
 import {Button} from "../../components/Button/Button";
 import {Label} from "../../components/Label/Label";
@@ -26,7 +26,7 @@ export class ProfilePage extends Block {
 	constructor() {
 		super({
 			...userData,
-			// Sidebar: new Sidebar(changePage),
+			Sidebar: new Sidebar(),
 			Avatar: new Avatar({
 				className: 'profile__avatar',
 				src: userData.avatar
@@ -208,7 +208,7 @@ export class ProfilePage extends Block {
 				href: '#',
 				text: 'Выйти',
 				className: 'profile__link',
-				dataPage: '/signIn',
+				dataPage: '/',
 				onClick: (e: MouseEvent) => {
 					e.preventDefault();
 					this.handleLinkClick(e)
@@ -217,7 +217,6 @@ export class ProfilePage extends Block {
 			isChangingPassword: false,
 			isEditingProfile: false,
 		});
-		// this.changePage = changePage
 		this.isChangingPassword = false
 		this.isEditingProfile = false
 	}
