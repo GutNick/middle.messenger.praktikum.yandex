@@ -4,8 +4,12 @@ import {getFormData, validateForm} from "../../utils/helpers";
 import {Button} from "../../components/Button/Button";
 import {Link} from "../../components/Link/Link";
 import router from "../../utils/Router";
+import authController from "../../controllers/AuthController";
+import {ISignUpData} from "../../api/AuthApi";
+import {connect} from "../../utils/HOC";
+import store from "../../utils/Store";
 
-export class RegisterPage extends Block {
+class RegisterPage extends Block {
 	static title = 'Регистрация';
 	constructor() {
 		super({
@@ -202,8 +206,11 @@ export class RegisterPage extends Block {
 					}
 					const isFormValid = this.checkFormValidity(true)
 					if (isFormValid) {
-						console.log(data)
-						router.go('/messenger')
+						authController
+							.signUp(data as unknown as ISignUpData)
+							.then(() => {
+								router.go('/messenger')
+							})
 					}
 				}
 			}),
@@ -220,6 +227,8 @@ export class RegisterPage extends Block {
 				}
 			})
 		});
+
+		this.checkUserIsAuthenticated()
 	}
 
 	componentDidMount() {
@@ -242,6 +251,15 @@ export class RegisterPage extends Block {
 	setCheckPasswordProps(value: string) {
 		this.children.PasswordCheckLabel.setProps({customValidateRule: {rule: value, message: 'Пароли не совпадают'}})
 		this.children.PasswordCheckLabel.children.InputElement.element?.dispatchEvent(new Event("blur"));
+	}
+
+	async checkUserIsAuthenticated() {
+		const res = await authController.getUser()
+		if (res?.status === 200) {
+			const userData = JSON.parse(res.responseText);
+			store.set('user', userData);
+			router.go('/messenger')
+		}
 	}
 
 	render() {
@@ -267,3 +285,4 @@ export class RegisterPage extends Block {
 		`;
 	}
 }
+export default connect(() => ({}))(RegisterPage);

@@ -5,36 +5,56 @@ import {Button} from "../../components/Button/Button";
 import {Label} from "../../components/Label/Label";
 import {getFormData, validateForm} from "../../utils/helpers";
 import {Link} from "../../components/Link/Link";
-import {userData} from "../../mockData";
+import store from "../../utils/Store";
+import authApi, {IUserData} from "../../api/AuthApi";
+import router from "../../utils/Router";
+import {connect} from "../../utils/HOC";
+import profileController from "../../controllers/ProfileController";
+import {IProfile} from "../../api/ProfileApi";
+import {Modal} from "../../components/Modal/Modal";
 
 enum stateKeys {
 	IS_EDITING_PROFILE = "isEditingProfile",
 	IS_CHANGING_PASSWORD = "isChangingPassword",
 }
 
-export class ProfilePage extends Block {
+class ProfilePage extends Block {
 	static noValidateRule = {
 		customValidateRule: {
 			rule: '.*',
 			message: ' ',
 		}
 	}
-	// private readonly changePage: (page: string) => void;
 	private isChangingPassword: boolean;
 	private isEditingProfile: boolean;
+	file: File | null
 
 	constructor() {
+		if (!store.getState().user) {
+			authApi.getUser()
+				.then(data => {
+					if (data.status === 200) {
+						const userData = JSON.parse(data.responseText);
+						store.set('user', userData);
+					} else {
+						router.go('/')
+					}
+				})
+		}
 		super({
-			...userData,
 			Sidebar: new Sidebar(),
 			Avatar: new Avatar({
 				className: 'profile__avatar',
-				src: userData.avatar
+				src: ""
 			}),
 			AvatarButton: new Button({
 				child: 'Поменять аватар',
 				className: 'profile__avatar-button',
 				type: 'button',
+				onClick: (e: MouseEvent) => {
+					e.preventDefault()
+					this.children.ModalAvatar.setProps({isActive: true})
+				}
 			}),
 			OldPasswordLabel: new Label({
 				className: 'profile',
@@ -86,7 +106,7 @@ export class ProfilePage extends Block {
 					id: 'email',
 					type: "email",
 					name: 'email',
-					value: userData.email,
+					value: '',
 					onBlur: () => {
 						this.checkFormValidity()
 					},
@@ -100,7 +120,7 @@ export class ProfilePage extends Block {
 					id: 'login',
 					type: "text",
 					name: 'login',
-					value: userData.login,
+					value: '',
 					onBlur: () => {
 						this.checkFormValidity()
 					},
@@ -114,7 +134,7 @@ export class ProfilePage extends Block {
 					id: 'first_name',
 					type: "text",
 					name: 'first_name',
-					value: userData.first_name,
+					value: '',
 					onBlur: () => {
 						this.checkFormValidity()
 					},
@@ -128,7 +148,7 @@ export class ProfilePage extends Block {
 					id: 'second_name',
 					type: "text",
 					name: 'second_name',
-					value: userData.second_name,
+					value: '',
 					onBlur: () => {
 						this.checkFormValidity()
 					},
@@ -142,7 +162,7 @@ export class ProfilePage extends Block {
 					id: 'display_name',
 					type: "text",
 					name: 'display_name',
-					value: userData.display_name,
+					value: '',
 					onBlur: () => {
 						this.checkFormValidity()
 					},
@@ -156,7 +176,7 @@ export class ProfilePage extends Block {
 					id: 'phone',
 					type: "tel",
 					name: 'phone',
-					value: userData.phone,
+					value: '',
 					onBlur: () => {
 						this.checkFormValidity()
 					},
@@ -179,8 +199,18 @@ export class ProfilePage extends Block {
 					}
 					const isFormValid = this.checkFormValidity(true)
 					if (isFormValid) {
-						console.log(data)
-						this.handleSubmitClick()
+						if (!data.oldPassword) {
+							profileController.updateProfile(data as IProfile)
+								.then((userData) => {
+									store.set("user", userData)
+									this.handleSubmitClick()
+								})
+						} else {
+							profileController.changePassword(data.oldPassword, data.newPassword)
+								.then(() => {
+									this.handleSubmitClick()
+								})
+						}
 					}
 				}
 			}),
@@ -211,14 +241,65 @@ export class ProfilePage extends Block {
 				dataPage: '/',
 				onClick: (e: MouseEvent) => {
 					e.preventDefault();
-					this.handleLinkClick(e)
+					profileController.logout()
+						.then(() => {
+							this.handleLinkClick(e)
+						})
 				}
+			}),
+			ModalAvatar: new Modal({
+				title: "Загрузите файл",
+				input: new Label({
+					className: "chat__avatar-label",
+					label: 'Выбрать файл на компьютере',
+					inputProps: {
+						type: 'file',
+						name: "avatar",
+						onChange: (e: InputEvent) => {
+							const inputTarget = e.target as HTMLInputElement;
+							if (inputTarget && inputTarget.files) {
+								this.setFileName(inputTarget.files[0].name)
+								this.file = inputTarget.files[0];
+								this.setAvatarButtonDisabled(false)
+								this.children.ModalAvatar.children.Input.hide()
+							} else {
+								this.setAvatarButtonDisabled(true)
+							}
+						}
+					}
+				}),
+				button: new Button({
+					child: 'Поменять',
+					className: "popup__button",
+					type: "submit",
+					onClick: (e: MouseEvent) => {
+						e.preventDefault()
+						if (this.file) {
+							const formData = new FormData
+							formData.append('avatar', this.file)
+							profileController.changeAvatar(formData)
+								.then((data) => {
+									if (data) {
+										this.children.Avatar.setProps({src: `https://ya-praktikum.tech/api/v2/resources${data.avatar}`});
+										const userData = store.getState().user as IUserData
+										store.set("user", {...userData, avatar: data.avatar})
+									}
+									this.children.ModalAvatar.setProps({isActive: false})
+									this.setFileName('')
+									this.children.ModalAvatar.children.Input.show()
+									this.file = null
+								})
+						}
+					}
+				}),
+				isActive: false
 			}),
 			isChangingPassword: false,
 			isEditingProfile: false,
 		});
 		this.isChangingPassword = false
 		this.isEditingProfile = false
+		this.file = null
 	}
 
 	checkFormValidity(checkAllForm?: boolean): boolean {
@@ -240,6 +321,16 @@ export class ProfilePage extends Block {
 	}
 
 	componentDidMount() {
+		if (store.getState().user) {
+			const user = store.getState().user as IUserData;
+			this.children.EmailLabel.children.InputElement.setProps({value: user.email});
+			this.children.LoginLabel.children.InputElement.setProps({value: user.login});
+			this.children.NameLabel.children.InputElement.setProps({value: user.first_name});
+			this.children.SecondNameLabel.children.InputElement.setProps({value: user.second_name});
+			this.children.DisplayNameLabel.children.InputElement.setProps({value: user.display_name});
+			this.children.PhoneLabel.children.InputElement.setProps({value: user.phone});
+			this.children.Avatar.setProps({src: user.avatar ? `https://ya-praktikum.tech/api/v2/resources${user.avatar}` : "/images/avatar.png"});
+		}
 		this.setValidateInputs()
 		this.setChildAttrs()
 	}
@@ -255,7 +346,7 @@ export class ProfilePage extends Block {
 	handleLinkClick(e: MouseEvent) {
 		const target = e.target as HTMLAnchorElement;
 		if (target.dataset?.page) {
-			// this.changePage(target.dataset.page);
+			router.go(target.dataset.page);
 		} else if (target.dataset.action) {
 			const params = target.dataset.action.split(" ")
 			params.forEach(param => {
@@ -310,6 +401,14 @@ export class ProfilePage extends Block {
 		}
 	}
 
+	setFileName(fileName: string): void {
+		this.children.ModalAvatar.setProps({description: fileName})
+	}
+
+	setAvatarButtonDisabled(disabled: boolean): void {
+		this.children.ModalAvatar.children.Button.setAttributes({disabled});
+	}
+
 	render() {
 		return `
 				<section class="page page_sidebar page_path_profile">
@@ -346,7 +445,12 @@ export class ProfilePage extends Block {
 										</form>
 								</div>
 						</div>
+						{{{ ModalAvatar }}}
 				</section>
 		`;
 	}
 }
+
+export default connect((state) => ({
+	user: state.user
+}))(ProfilePage);

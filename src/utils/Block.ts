@@ -5,7 +5,7 @@ import {EventBus} from "./EventBus";
 
 type EventsMap = Partial<Record<keyof HTMLElementEventMap, EventListener>>;
 
-type Props = {
+export type Props = {
 	events?: EventsMap;
 	[key: string]: unknown;
 	settings?: Record<string, unknown>;
@@ -29,7 +29,7 @@ class Block {
 	children: Children;
 	eventBus: () => EventBus;
 	private readonly _id = null;
-	protected lists: Record<string, unknown[]>;
+	public lists: Record<string, unknown[]>;
 
 	constructor(propsAndChildren: Record<string, unknown> = {}) {
 		const { children, props, lists } = this._getChildren(propsAndChildren);

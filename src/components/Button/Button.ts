@@ -2,7 +2,7 @@ import Block from "../../utils/Block";
 
 interface IButtonProps {
 	className?: string;
-	child: string | HTMLElement;
+	child: string | HTMLElement | Block;
 	onClick?: (e: MouseEvent) => void;
 	type?: "button" | "submit";
 	id?: string;
@@ -21,6 +21,6 @@ export class Button extends Block {
 
 	// Возвращаем строку с шаблоном
 	render() {
-		return '<button id="{{ id }}" class="button {{ className }}" type="{{ type }}">{{child}}</button>';
+		return '<button id="{{ id }}" class="button {{ className }}" type="{{ type }}">{{{child}}}</button>';
 	}
 }
