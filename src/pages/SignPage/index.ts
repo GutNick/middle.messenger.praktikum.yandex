@@ -1,1 +1,2 @@
-export { SignPage } from './SignPage';
+import SignPage from "./SignPage";
+export { SignPage }

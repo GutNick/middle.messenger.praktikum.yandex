@@ -5,7 +5,7 @@ import {EventBus} from "./EventBus";
 
 type EventsMap = Partial<Record<keyof HTMLElementEventMap, EventListener>>;
 
-type Props = {
+export type Props = {
 	events?: EventsMap;
 	[key: string]: unknown;
 	settings?: Record<string, unknown>;
@@ -29,7 +29,7 @@ class Block {
 	children: Children;
 	eventBus: () => EventBus;
 	private readonly _id = null;
-	protected lists: Record<string, unknown[]>;
+	public lists: Record<string, unknown[]>;
 
 	constructor(propsAndChildren: Record<string, unknown> = {}) {
 		const { children, props, lists } = this._getChildren(propsAndChildren);
@@ -55,6 +55,18 @@ class Block {
 			const eventHandler = events[eventName];
 			if (this._element && eventHandler) {
 				this._element.addEventListener(eventName, eventHandler);
+			}
+		});
+	}
+
+	private _removeEvents() {
+		const { events = {} } = this.props;
+
+		(Object.keys(events) as Array<keyof HTMLElementEventMap>).forEach(eventName => {
+			const eventHandler = events[eventName];
+
+			if (this._element && eventHandler) {
+				this._element.removeEventListener(eventName, eventHandler);
 			}
 		});
 	}
@@ -93,7 +105,7 @@ class Block {
 	}
 
 	componentDidUpdate(oldProps: Props, newProps: Props): boolean {
-		console.debug(this, oldProps, newProps);
+		console.debug(oldProps, newProps);
 		return true;
 	}
 
@@ -251,18 +263,6 @@ class Block {
 		if (content) {
 			content.style.display = 'none';
 		}
-	}
-
-	private _removeEvents() {
-		const { events = {} } = this.props;
-
-		(Object.keys(events) as Array<keyof HTMLElementEventMap>).forEach(eventName => {
-			const eventHandler = events[eventName];
-
-			if (this._element && eventHandler) {
-				this._element.removeEventListener(eventName, eventHandler);
-			}
-		});
 	}
 }
 

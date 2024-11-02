@@ -2,7 +2,7 @@ import Block from "../../utils/Block";
 import {IInputProps, Input} from "../Input/Input";
 import {InputErrorMessage} from "../InputErrorMessage/InputErrorMessage";
 import validator from "../../utils/Validator";
-import {isEquals} from "../../utils/helpers";
+import {isEqual} from "../../utils/helpers";
 
 interface ILabelProps {
 	className?: string;
@@ -57,7 +57,7 @@ export class Label extends Block {
 	}
 
 	componentDidUpdate(oldProps: Record<string, unknown>, newProps: Record<string, unknown>): boolean {
-		if (!isEquals(oldProps, newProps)) {
+		if (!isEqual(oldProps, newProps)) {
 			this.children.InputElement.setProps({customValidateRule: newProps.customValidateRule})
 		}
 		return true
