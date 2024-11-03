@@ -1,1 +1,2 @@
-export { ChatPage } from './ChatPage'
+import ChatPage from "./ChatPage";
+export { ChatPage }

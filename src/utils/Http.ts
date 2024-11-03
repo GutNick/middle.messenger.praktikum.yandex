@@ -19,6 +19,10 @@ function queryStringify(data: Record<string, unknown>): string {
 }
 
 export class HTTPTransport {
+	baseUrl: string
+	constructor() {
+		this.baseUrl = 'https://ya-praktikum.tech/api/v2'
+	}
 	get(url: string, options: OptionsWithoutMethod = {}): Promise<XMLHttpRequest> {
 		const query = options.data && typeof options.data === 'object' ? queryStringify(options.data as Record<string, unknown>) : '';
 		return this.request(url + query, { ...options, method: METHOD.GET });
@@ -41,9 +45,10 @@ export class HTTPTransport {
 
 		return new Promise((resolve, reject) => {
 			const xhr = new XMLHttpRequest();
-			xhr.open(method, url);
-
-			xhr.setRequestHeader('Content-Type', 'application/json');
+			xhr.open(method, `${this.baseUrl}${url}`);
+			if (!(data instanceof FormData)) {
+				xhr.setRequestHeader('Content-Type', 'application/json');
+			}
 
 			xhr.onload = function() {
 				resolve(xhr);
@@ -52,11 +57,12 @@ export class HTTPTransport {
 			xhr.onabort = reject;
 			xhr.onerror = reject;
 			xhr.ontimeout = reject;
+			xhr.withCredentials = true;
 
 			if (method === METHOD.GET || !data) {
 				xhr.send();
 			} else {
-				xhr.send(JSON.stringify(data));
+				xhr.send(data instanceof FormData ? data : JSON.stringify(data));
 			}
 		});
 	}

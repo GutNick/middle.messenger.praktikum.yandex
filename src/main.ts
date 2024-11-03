@@ -1,7 +1,13 @@
 import './styles/main.pcss';
-import App from './App';
+import router from "./utils/Router";
+import * as Pages from './pages';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = new App();
-  app.render();
+  router
+		.use('/', Pages.SignPage)
+		.use('/sign-up', Pages.RegisterPage)
+		.use('/settings', Pages.ProfilePage)
+		.use('/messenger', Pages.ChatPage)
+		.use('/settings', Pages.ProfilePage)
+		.start()
 });

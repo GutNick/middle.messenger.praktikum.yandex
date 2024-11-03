@@ -1,62 +1,48 @@
-import Block from "../../utils/Block";
+import Block, {Props} from "../../utils/Block";
 import {Link} from "../../components/Link/Link";
 import {Label} from "../../components/Label/Label";
 import {ChatListItem, IChatListItemProps} from "../../components/ChatListItem/ChatListItem";
 import {ChatContent} from "../../components/ChatContent/ChatContent";
+import router from "../../utils/Router";
+import {connect} from "../../utils/HOC";
+import store from "../../utils/Store";
+import authApi, {IUserData} from "../../api/AuthApi";
+import chatController from "../../controllers/ChatController";
+import {Button} from "../../components/Button/Button";
+import {Modal} from "../../components/Modal/Modal";
+import {Input} from "../../components/Input/Input";
 
-const chats: IChatListItemProps[] = [
-	{
-		id: 1,
-		avatar: '/images/avatar.png',
-		name: 'Андрей',
-		lastMessage: 'Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, так как астронавты с собой забрали только кассеты с пленкой. Хассельблад в итоге адаптировал SWC для космоса, но что-то пошло не так и на ракету они так никогда и не попали. Всего их было произведено 25 штук, одну из них недавно продали на аукционе за 45000 евро.',
-		time: '10:49',
-		notifications: 2,
-	},
-	{
-		id: 2,
-		avatar: '/images/avatar.png',
-		name: 'Андрей',
-		lastMessage: 'Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, так как астронавты с собой забрали только кассеты с пленкой. Хассельблад в итоге адаптировал SWC для космоса, но что-то пошло не так и на ракету они так никогда и не попали. Всего их было произведено 25 штук, одну из них недавно продали на аукционе за 45000 евро.',
-		time: '10:49',
-		notifications: 2,
-	}
-]
+interface IMessage {
+	user_id: number;
+	content: string;
+	time: string;
+}
 
-export class ChatPage extends Block {
-	constructor(changePage: (page: string) => void) {
-
-		const ChatItems = chats.map((item) => {
-			return new ChatListItem({
-				id: item.id,
-				avatar: item.avatar,
-				name: item.name,
-				lastMessage: item.lastMessage,
-				time:  item.time,
-				notifications: item.notifications,
-				onClick: (e: MouseEvent, item: Block) => {
-					e.preventDefault()
-					this.lists.ChatItems.forEach((chat) => {
-						(chat as Block).setProps({isActive: chat === item})
-						const selectedChat = chats.find(chat => chat.id === item.props.id)
-						if (chat === item) {
-							this.children.ChatContent.setProps({...selectedChat})
-						}
-					})
-				}
-			});
-		});
+class ChatPage extends Block {
+	newChatTitle: string
+	constructor() {
+		if (!store.getState().user) {
+			authApi.getUser()
+				.then(data => {
+					if (data.status === 200) {
+						const userData = JSON.parse(data.responseText);
+						store.set('user', userData);
+					} else {
+						router.go('/')
+					}
+				})
+		}
 		super({
 			ProfileLink: new Link({
 				href: '#',
-				dataPage: '/profile',
+				dataPage: '/settings',
 				text: 'Профиль',
 				className: 'chats__link',
 				onClick: (e: MouseEvent) => {
 					e.preventDefault();
 					const target = e.target as HTMLAnchorElement;
 					if (target.dataset?.page) {
-						changePage(target.dataset.page);
+						router.go(target.dataset.page)
 					}
 				}
 			}),
@@ -68,22 +54,122 @@ export class ChatPage extends Block {
 					placeholder: "Поиск"
 				}
 			}),
-			ChatItems,
-			ChatContent: new ChatContent({})
+			CreateChatButton: new Button({
+				child: "Создать чат",
+				className: 'chats__createButton',
+				onClick: (e: MouseEvent) => {
+					e.preventDefault()
+					this.children.Modal.setProps({isActive: true})
+				}
+			}),
+			Modal: new Modal({
+				title: "Создать чат",
+				input: new Input({
+					className: "popup",
+					onBlur: (e: Event) => {
+						if ((e.target as HTMLInputElement).value) {
+							this.newChatTitle = (e.target as HTMLInputElement).value
+							this.children.Modal.children.Button.setAttributes({disabled: false})
+						}
+					}
+				}),
+				button: new Button({
+					child: 'Создать чат',
+					className: "popup__button",
+					type: "submit",
+					onClick: (e: MouseEvent) => {
+						e.preventDefault()
+						if (this.newChatTitle) {
+							this.createChat(this.newChatTitle)
+								.then(() => {
+									this.children.Modal.setProps({isActive: false})
+									this.getChats()
+								})
+						}
+					}
+				}),
+				isActive: false
+			}),
+			ChatItems: [],
+			ChatContent: new ChatContent({
+				removeChat: (chatId) => {
+					this.removeChat(chatId);
+				}
+			})
 		});
+
+		this.newChatTitle = ''
+
+		this.getChats()
+	}
+
+	async getChats() {
+		await chatController.getUserChats()
+			.then(() => {
+			const chats: IChatListItemProps[] = store.getState().chats as IChatListItemProps[];
+			this.lists.ChatItems = chats.map((item: IChatListItemProps) => {
+				return new ChatListItem({
+					id: item.id,
+					avatar: item.avatar,
+					title: item.title,
+					last_message: item.last_message,
+					time:  item.time,
+					unread_count: item.unread_count,
+					onClick: async (e: MouseEvent, item: Block) => {
+						await chatController.closeSocket()
+						await chatController.chatWebSocket(item.props.id as number)
+						e.preventDefault()
+						this.lists.ChatItems.forEach((chat) => {
+							(chat as Block).setProps({isActive: chat === item})
+							const selectedChat = chats.find(chat => chat.id === item.props.id)
+							if (chat === item) {
+								this.children.ChatContent.setProps({...selectedChat })
+							}
+						})
+					}
+				});
+			})
+			this.eventBus().emit(Block.EVENTS.FLOW_RENDER);
+		})
+	}
+
+	async createChat(title: string) {
+		await chatController.createChat(title)
+	}
+
+	componentDidUpdate(oldProps: Props, newProps: Props): boolean {
+		if (store.getState().messages) {
+			this.children.ChatContent.setProps({messages: JSON.parse(store.getState().messages as string).map((message: IMessage) => {
+					const time = new Date(message.time);
+					return {...message, isUserMessage: message.user_id === (store.getState().user as IUserData).id, time: time.getHours() + ":" + time.getMinutes()}
+				})})
+		}
+		return super.componentDidUpdate(oldProps, newProps);
+	}
+
+	async removeChat(chatId: number) {
+		store.set('chats', [...(store.getState().chats as IChatListItemProps[]).filter((item: IChatListItemProps) => item.id !== chatId)]);
+		this.getChats()
 	}
 
 	render() {
 		return `<section class="chats">
 							<div class="chats__sidebar">
 								{{{ ProfileLink }}}
+								{{{ CreateChatButton }}}
 								{{{ SearchLabel }}}
 								<ul class="chats__list">
 										{{{ ChatItems }}}
 							</ul>
 							</div>
 							{{{ ChatContent }}}
-						
+						{{{ Modal }}}
 						</section>`;
 	}
 }
+
+export default connect((state) => ({
+	chats: state.chats,
+	messages: state.messages,
+	user: state.user
+}))(ChatPage);

@@ -3,10 +3,15 @@ import {Label} from "../../components/Label/Label";
 import {getFormData, validateForm} from "../../utils/helpers";
 import {Button} from "../../components/Button/Button";
 import {Link} from "../../components/Link/Link";
+import router from "../../utils/Router";
+import authController from "../../controllers/AuthController";
+import {ISignUpData} from "../../api/AuthApi";
+import {connect} from "../../utils/HOC";
+import store from "../../utils/Store";
 
-export class RegisterPage extends Block {
+class RegisterPage extends Block {
 	static title = 'Регистрация';
-	constructor(changePage: (page: string) => void) {
+	constructor() {
 		super({
 			title: RegisterPage.title,
 			EmailLabel: new Label({
@@ -201,24 +206,29 @@ export class RegisterPage extends Block {
 					}
 					const isFormValid = this.checkFormValidity(true)
 					if (isFormValid) {
-						console.log(data)
-						changePage('/chats')
+						authController
+							.signUp(data as unknown as ISignUpData)
+							.then(() => {
+								router.go('/messenger')
+							})
 					}
 				}
 			}),
 			LoginLink: new Link({
 				href: '#',
-				dataPage: '/signIn',
+				dataPage: '/',
 				text: 'Войти',
 				onClick: (e: MouseEvent) => {
 					e.preventDefault();
 					const target = e.target as HTMLAnchorElement;
 					if (target.dataset?.page) {
-						changePage(target.dataset.page);
+						router.go(target.dataset.page)
 					}
 				}
 			})
 		});
+
+		this.checkUserIsAuthenticated()
 	}
 
 	componentDidMount() {
@@ -241,6 +251,15 @@ export class RegisterPage extends Block {
 	setCheckPasswordProps(value: string) {
 		this.children.PasswordCheckLabel.setProps({customValidateRule: {rule: value, message: 'Пароли не совпадают'}})
 		this.children.PasswordCheckLabel.children.InputElement.element?.dispatchEvent(new Event("blur"));
+	}
+
+	async checkUserIsAuthenticated() {
+		const res = await authController.getUser()
+		if (res?.status === 200) {
+			const userData = JSON.parse(res.responseText);
+			store.set('user', userData);
+			router.go('/messenger')
+		}
 	}
 
 	render() {
@@ -266,3 +285,4 @@ export class RegisterPage extends Block {
 		`;
 	}
 }
+export default connect(() => ({}))(RegisterPage);

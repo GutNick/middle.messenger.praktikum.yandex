@@ -1,1 +1,2 @@
-export { RegisterPage } from './RegisterPage';
+import RegisterPage from "./RegisterPage";
+export { RegisterPage }

@@ -4,6 +4,7 @@ export interface IInputProps {
 	id?: string;
 	className?: string;
 	onBlur?: (e: Event) => void;
+	onChange?: (e: InputEvent) => void;
 	onFocus?: (e: FocusEvent) => void;
 	type?: "text" | "tel" | "email" | "url" | "password" | "search" | 'file';
 	placeholder?: string;
@@ -25,8 +26,9 @@ export class Input extends Block {
 			...props,
 			settings: {withInternalID: props.withInternalID},
 			events: {
-				blur: (e: Event) => props.onBlur && props.onBlur(e),
+				blur: (e: FocusEvent) => props.onBlur && props.onBlur(e),
 				focus: (e: FocusEvent) => props.onFocus && props.onFocus(e),
+				change: (e: InputEvent) => props.onChange && props.onChange(e),
 			},
 		});
 	}

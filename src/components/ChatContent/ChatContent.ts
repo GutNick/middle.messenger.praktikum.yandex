@@ -3,24 +3,185 @@ import {Avatar} from "../Avatar/Avatar";
 import {Button} from "../Button/Button";
 import {Label} from "../Label/Label";
 import validator from "../../utils/Validator";
+import {Modal} from "../Modal/Modal";
+import chatController from "../../controllers/ChatController";
+import {ChatConfigPopup} from "../ChatConfigPopup/ChatConfigPopup";
+import {IUserData} from "../../api/AuthApi";
 
 interface IChatContentProps {
 	avatar?: string
-	name?: string
+	title?: string
+	removeChat: (chatId: number) => void;
 }
 
 export class ChatContent extends Block {
+	file: File | null
+	isConfigPopupOpened: boolean
+	userName: string
 	constructor(props: IChatContentProps) {
 		super({
 			...props,
-			Avatar: new Avatar({
-				src: props.avatar || '',
-				className: "chat__avatar-wrapper",
+			AvatarButton: new Button({
+				type: 'button',
+				className: 'chat__avatar-button',
+				child: new Avatar({
+					src: props.avatar ? `https://ya-praktikum.tech/api/v2/resources${props.avatar}` : '/images/avatar.png',
+					className: "chat__avatar-wrapper",
+				}),
+				onClick: (e: MouseEvent) => {
+					e.preventDefault();
+					this.children.ModalAvatar.setProps({isActive: true})
+				}
+			}),
+			ModalAddUser: new Modal({
+				title: "Добавить пользователя",
+				input: new Label({
+					label: '',
+					className: 'popup',
+					inputProps: {
+						className: "popup",
+						onBlur: (e: Event) => {
+							if ((e.target as HTMLInputElement).value) {
+								this.userName = (e.target as HTMLInputElement).value
+								this.children.ModalAddUser.children.Button.setAttributes({disabled: false})
+							}
+						}
+					}
+				}),
+				button: new Button({
+					child: 'Добавить',
+					className: "popup__button",
+					type: "submit",
+					onClick: (e: MouseEvent) => {
+						e.preventDefault()
+						chatController.searchUser(this.userName)
+							.then((users: IUserData[]) => {
+								if (!users.length) {
+									this.children.ModalAddUser.children.Input.children.ErrorMessage.setProps({text: "Пользователь не найден"})
+									this.children.ModalAddUser.children.Input.children.ErrorMessage.show()
+									this.children.ModalAddUser.children.Button.setAttributes({disabled: true});
+									throw new Error("Пользователь не найден")
+								}
+								return users.map(user => user.id)
+							})
+							.then(usersId => {
+								chatController.addRemoveUsers(this.props.id as number, usersId, true)
+									.then((status) => {
+										if (!status || status !== "OK") {
+											throw new Error()
+										}
+										this.children.ModalAddUser.children.Button.setAttributes({disabled: true});
+										this.children.ModalAddUser.setProps({isActive: false})
+									})
+							})
+					}
+				}),
+				isActive: false
+			}),
+			ModalRemoveUser: new Modal({
+				title: "Удалить пользователя",
+				input: new Label({
+					label: '',
+					className: 'popup',
+					inputProps: {
+						className: "popup",
+						onBlur: (e: Event) => {
+							if ((e.target as HTMLInputElement).value) {
+								this.userName = (e.target as HTMLInputElement).value
+								this.children.ModalRemoveUser.children.Button.setAttributes({disabled: false})
+							}
+						}
+					}
+				}),
+				button: new Button({
+					child: 'Удалить',
+					className: "popup__button",
+					type: "submit",
+					onClick: (e: MouseEvent) => {
+						e.preventDefault()
+						chatController.searchUser(this.userName)
+							.then((users: IUserData[]) => {
+								if (!users.length) {
+									this.children.ModalRemoveUser.children.Input.children.ErrorMessage.setProps({text: "Пользователь не найден"})
+									this.children.ModalRemoveUser.children.Input.children.ErrorMessage.show()
+									this.children.ModalRemoveUser.children.Button.setAttributes({disabled: true});
+									throw new Error("Пользователь не найден")
+								}
+								return users.map(user => user.id)
+							})
+							.then(usersId => {
+								chatController.addRemoveUsers(this.props.id as number, usersId, false)
+									.then((status) => {
+										if (!status || status !== "OK") {
+											throw new Error()
+										}
+										this.children.ModalRemoveUser.children.Button.setAttributes({disabled: true});
+										this.children.ModalRemoveUser.setProps({isActive: false})
+									})
+							})
+					}
+				}),
+				isActive: false
+			}),
+			ModalAvatar: new Modal({
+				title: "Загрузите файл",
+				input: new Label({
+					className: "chat__avatar-label",
+					label: 'Выбрать файл на компьютере',
+					inputProps: {
+						type: 'file',
+						name: "avatar",
+						onChange: (e: InputEvent) => {
+							const inputTarget = e.target as HTMLInputElement;
+							if (inputTarget && inputTarget.files) {
+								this.setFileName(inputTarget.files[0].name)
+								this.file = inputTarget.files[0];
+								this.setAvatarButtonDisabled(false)
+								this.children.ModalAvatar.children.Input.hide()
+							} else {
+								this.setAvatarButtonDisabled(true)
+							}
+						}
+					}
+				}),
+				button: new Button({
+					child: 'Поменять',
+					className: "popup__button",
+					type: "submit",
+					onClick: (e: MouseEvent) => {
+						e.preventDefault()
+						if (this.props.id && this.file) {
+							const formData = new FormData
+							formData.append('chatId', (this.props.id as number).toString())
+							formData.append('avatar', this.file)
+							chatController.changeChatAvatar(formData)
+								.then((data) => {
+									if (data) {
+										this.children.AvatarButton.children.child.setProps({src: `https://ya-praktikum.tech/api/v2/resources${data.avatar}`});
+									}
+									this.children.ModalAvatar.setProps({isActive: false})
+									this.setFileName('')
+									this.children.ModalAvatar.children.Input.show()
+									this.file = null
+								})
+						}
+					}
+				}),
+				isActive: false
 			}),
 			ConfigButton: new Button({
 				type: 'button',
 				child: '',
-				className: 'chat__config-button'
+				className: 'chat__config-button',
+				onClick: (e: MouseEvent) => {
+					e.preventDefault()
+					if (this.isConfigPopupOpened) {
+						this.children.ChatConfigPopup.hide()
+					} else {
+						this.children.ChatConfigPopup.show()
+					}
+					this.isConfigPopupOpened = !this.isConfigPopupOpened
+				}
 			}),
 			LabelFileInput: new Label({
 				className: 'chat__message-file',
@@ -46,52 +207,106 @@ export class ChatContent extends Block {
 				className: 'chat__message-submit-button',
 				onClick: (e: MouseEvent) => {
 					e.preventDefault();
-					const data: Record<string, string> = {}
 					if (validator.isValid(this.children.LabelMessageInput.children.InputElement.getContent(), '^.+$', 'Не должно быть пустым').isValid) {
-						const {name, value} = this.children.LabelMessageInput.children.InputElement.getContent() as HTMLInputElement;
-						data[name] = value
-						console.log(data)
+						const inputElement = this.children.LabelMessageInput.children.InputElement.getContent() as HTMLInputElement
+						const {value} = inputElement;
+						chatController.sendMessage(value.replace(/<\/[^>]+(>|$)/g, ""))
+							.then(() => {
+								this.scrollToBottom()
+								inputElement.value = ''
+							})
 					}
 				}
 			}),
+			ChatConfigPopup: new ChatConfigPopup({
+				addUser: () => {
+					this.showAddUserPopup()
+				},
+				removeUser: () => {
+					this.showRemoveUserPopup()
+				},
+				removeChat: () => {
+					this.removeChat()
+						.then((data) => {
+							if (data) {
+								props.removeChat(data.result.id)
+							}
+						})
+						.then(() => {
+							this.setProps({title: ''})
+						})
+				}
+			})
 		});
+		this.file = null
+		this.isConfigPopupOpened = false
+		this.userName = ''
 	}
 
 	componentDidUpdate(oldProps: Record<string, unknown>, newProps: Record<string, unknown>): boolean {
-		if (oldProps.avatar !== newProps.avatar) {
-			this.children.Avatar.setProps({src: newProps.avatar});
+		if (oldProps.avatar !== newProps.avatar && this.children.AvatarButton) {
+			this.children.AvatarButton.children.child.setProps({src: newProps.avatar ? `https://ya-praktikum.tech/api/v2/resources${newProps.avatar}` : '/images/avatar.png',});
 		}
 		return true
+	}
+	componentDidMount() {
+		super.componentDidMount();
+		this.scrollToBottom()
+	}
+
+	scrollToBottom() {
+		const contentSection = document.querySelector(".chat__content");
+		if (contentSection) {
+			contentSection.scrollTop = contentSection.scrollHeight;
+		}
+	}
+
+	setFileName(fileName: string): void {
+		this.children.ModalAvatar.setProps({description: fileName})
+	}
+
+	setAvatarButtonDisabled(disabled: boolean): void {
+		this.children.ModalAvatar.children.Button.setAttributes({disabled});
+	}
+
+	showAddUserPopup(): void {
+		this.children.ModalAddUser.setProps({isActive: true})
+		this.isConfigPopupOpened = false
+	}
+
+	showRemoveUserPopup(): void {
+		this.children.ModalRemoveUser.setProps({isActive: true})
+		this.isConfigPopupOpened = false
+	}
+
+	async removeChat() {
+		return chatController.deleteChat(this.props.id as number)
 	}
 
 	render() {
 		return `<div class="chats__content chat">
-								{{#if this.name}}
+								{{#if this.title}}
 								<div class="chat__header">
-									{{{ Avatar }}}
-									<div class="chat__name">{{name}}</div>
+									{{{ AvatarButton }}}
+									<div class="chat__name">{{title}}</div>
 									{{{ ConfigButton }}}
 								</div>
 								<div class="chat__content">
-									<p class="chat__date">19 июня</p>
-									<div class="chat__message">
-										<p class="chat__message-text">Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. 
-										Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, 
-										так как астронавты с собой забрали только кассеты с пленкой. Хассельблад в итоге адаптировал SWC для космоса, но что-то пошло не так и на ракету они так никогда и не попали. 
-										Всего их было произведено 25 штук, одну из них недавно продали на аукционе за 45000 евро.</p>
-										<p class="chat__message-time">11:56</p>
+								{{#each messages}}
+								{{#if this.isUserMessage}}
+								<div  class="chat__message chat__message_user">
+								{{else}}
+								<div class="chat__message">
+								{{/if}}
+										<p class="chat__message-text">{{this.content}}</p>
+										<p class="chat__message-time">{{time}}</p>
 									</div>
-									<div  class="chat__message chat__message_user">
-										<p class="chat__message-text">Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. 
-																Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, 
-																так как астронавты с собой забрали только кассеты с пленкой. Хассельблад в итоге адаптировал SWC для космоса, но что-то пошло не так и на ракету они так никогда и не попали. 
-																Всего их было произведено 25 штук, одну из них недавно продали на аукционе за 45000 евро.</p>
-																<p class="chat__message-time">12:00</p>
-									</div>
+									{{/each}}
+								{{{ChatConfigPopup}}}
 								</div>
 								<div class="chat__footer">
 									<form class="chat__message-form">
-									{{{ LabelFileInput }}}
+<!--									{{{ LabelFileInput }}}-->
 										{{{ LabelMessageInput }}}
 										{{{ SubmitButton }}}
 									</form>
@@ -100,6 +315,9 @@ export class ChatContent extends Block {
 								{{^}}
 								<p class="chats__info-message">Выберите чат чтобы отправить сообщение</p>
 								{{/if}}
+								{{{ ModalAvatar }}}
+								{{{ ModalAddUser }}}
+								{{{ ModalRemoveUser }}}
 							</div>`
 	}
 }

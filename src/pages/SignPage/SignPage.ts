@@ -3,10 +3,15 @@ import {Label} from "../../components/Label/Label";
 import {Button} from "../../components/Button/Button";
 import {getFormData, validateForm} from "../../utils/helpers";
 import {Link} from "../../components/Link/Link";
+import router from "../../utils/Router";
+import {connect} from "../../utils/HOC";
+import authController from "../../controllers/AuthController";
+import {ISignUpData} from "../../api/AuthApi";
+import store from "../../utils/Store";
 
-export class SignPage extends Block {
+class SignPage extends Block {
 	static title = 'Вход';
-	constructor(changePage: (page: string) => void) {
+	constructor() {
 		super({
 			title: SignPage.title,
 			LoginLabel: new Label({
@@ -72,24 +77,32 @@ export class SignPage extends Block {
 					}
 					const isFormValid = this.checkFormValidity(true)
 					if (isFormValid) {
-						console.log(data)
-						changePage('/chats')
+						authController
+							.signIn(data as unknown as ISignUpData)
+							.then((res) => {
+								if (res === null) {
+									throw new Error()
+								}
+								router.go('/messenger')
+							})
 					}
 				}
 			}),
 			RegisterLink: new Link({
 				href: '#',
-				dataPage: '/signUp',
+				dataPage: '/sign-up',
 				text: 'Нет аккаунта?',
 				onClick: (e: MouseEvent) => {
 					e.preventDefault();
 					const target = e.target as HTMLAnchorElement;
 					if (target.dataset?.page) {
-						changePage(target.dataset.page);
+						router.go(target.dataset.page)
 					}
 				}
 			})
 		});
+
+		this.checkUserIsAuthenticated()
 	}
 
 	componentDidMount() {
@@ -107,6 +120,15 @@ export class SignPage extends Block {
 		const isFormValid = validateForm(this);
 		this.children.SubmitButton.setAttributes({disabled: !isFormValid});
 		return isFormValid
+	}
+
+	async checkUserIsAuthenticated() {
+		const res = await authController.getUser()
+		if (res?.status === 200) {
+			const userData = JSON.parse(res.responseText);
+			store.set('user', userData);
+			router.go('/messenger')
+		}
 	}
 
 	render() {
@@ -127,3 +149,4 @@ export class SignPage extends Block {
 		`;
 	}
 }
+export default connect(() => ({}))(SignPage);
