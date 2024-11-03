@@ -11,5 +11,8 @@ export class BaseAPI {
 		throw new Error('Not implemented');
 	}
 
-	delete() { throw new Error('Not implemented'); }
+	delete(data: unknown): unknown {
+		console.debug(data)
+		throw new Error('Not implemented');
+	}
 }

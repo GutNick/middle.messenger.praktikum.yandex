@@ -30,6 +30,10 @@ class ChatAPI extends BaseAPI {
 		}
 		return chatAPIInstance.delete('/chats/users', {data: {chatId, users}});
 	}
+
+	delete(chatId: number) {
+		return chatAPIInstance.delete('/chats', {data: {chatId}});
+	}
 }
 
 export default new ChatAPI()

@@ -106,18 +106,22 @@ class ChatController {
 		});
 
 		this.socket.addEventListener('message', event => {
-			let data = JSON.parse(event.data);
-			if (data.type === "message" || Array.isArray(data)) {
-				if (Array.isArray(data)) {
-					data = data.sort(function(a: {time: string}, b: {time: string}) {
-						return (a.time < b.time) ? -1 : ((a.time > b.time) ? 1 : 0);
-					});
-					store.set('messages', JSON.stringify(data));
-				} else {
-					const storeMessages = JSON.parse(store.getState().messages as string) || []
-					storeMessages.push(data)
-					store.set('messages', JSON.stringify(storeMessages));
+			try {
+				let data = JSON.parse(event.data);
+				if (data.type === "message" || Array.isArray(data)) {
+					if (Array.isArray(data)) {
+						data = data.sort(function(a: {time: string}, b: {time: string}) {
+							return (a.time < b.time) ? -1 : ((a.time > b.time) ? 1 : 0);
+						});
+						store.set('messages', JSON.stringify(data));
+					} else {
+						const storeMessages = JSON.parse(store.getState().messages as string) || []
+						storeMessages.push(data)
+						store.set('messages', JSON.stringify(storeMessages));
+					}
 				}
+			} catch (error) {
+				console.error("Error during get message:", error);
 			}
 			console.log('Получены данные', event.data);
 		});
@@ -139,6 +143,18 @@ class ChatController {
 
 	public async closeSocket() {
 		this.socket?.close();
+	}
+
+	public async deleteChat(chatId: number): Promise<Promise<null | undefined | {result: {id: number}}> | void> {
+		try {
+			const res = await chatApi.delete(chatId)
+			if (res.status !== 200) {
+				return null
+			}
+			return JSON.parse(res.responseText)
+		} catch (error) {
+			console.error("Error during create chat:", error);
+		}
 	}
 }
 

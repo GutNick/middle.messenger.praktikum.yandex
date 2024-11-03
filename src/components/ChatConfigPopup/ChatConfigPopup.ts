@@ -4,6 +4,7 @@ import {Button} from "../Button/Button";
 interface IChatConfigPopupProps {
 	addUser: () => void;
 	removeUser: () => void;
+	removeChat: () => void;
 }
 
 export class ChatConfigPopup extends Block {
@@ -26,6 +27,15 @@ export class ChatConfigPopup extends Block {
 					props.removeUser()
 					this.hide()
 				},
+			}),
+			RemoveChatButton: new Button({
+				child: 'Удалить чат',
+				className: 'chat__config-popup-button chat__config-popup-button_remove-user',
+				onClick: (e: MouseEvent) => {
+					e.preventDefault()
+					props.removeChat()
+					this.hide()
+				},
 			})
 		});
 	}
@@ -39,6 +49,7 @@ export class ChatConfigPopup extends Block {
 		return `<div class="chat__config-popup">
 			{{{ AddUserButton }}}
 			{{{ RemoveUserButton }}}
+			{{{ RemoveChatButton }}}
 			</div>`;
 	}
 }
