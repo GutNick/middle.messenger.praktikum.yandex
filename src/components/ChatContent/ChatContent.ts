@@ -11,6 +11,7 @@ import {IUserData} from "../../api/AuthApi";
 interface IChatContentProps {
 	avatar?: string
 	title?: string
+	removeChat: (chatId: number) => void;
 }
 
 export class ChatContent extends Block {
@@ -223,6 +224,17 @@ export class ChatContent extends Block {
 				},
 				removeUser: () => {
 					this.showRemoveUserPopup()
+				},
+				removeChat: () => {
+					this.removeChat()
+						.then((data) => {
+							if (data) {
+								props.removeChat(data.result.id)
+							}
+						})
+						.then(() => {
+							this.setProps({title: ''})
+						})
 				}
 			})
 		});
@@ -265,6 +277,10 @@ export class ChatContent extends Block {
 	showRemoveUserPopup(): void {
 		this.children.ModalRemoveUser.setProps({isActive: true})
 		this.isConfigPopupOpened = false
+	}
+
+	async removeChat() {
+		return chatController.deleteChat(this.props.id as number)
 	}
 
 	render() {

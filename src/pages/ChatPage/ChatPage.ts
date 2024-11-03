@@ -91,7 +91,11 @@ class ChatPage extends Block {
 				isActive: false
 			}),
 			ChatItems: [],
-			ChatContent: new ChatContent({})
+			ChatContent: new ChatContent({
+				removeChat: (chatId) => {
+					this.removeChat(chatId);
+				}
+			})
 		});
 
 		this.newChatTitle = ''
@@ -141,6 +145,11 @@ class ChatPage extends Block {
 				})})
 		}
 		return super.componentDidUpdate(oldProps, newProps);
+	}
+
+	async removeChat(chatId: number) {
+		store.set('chats', [...(store.getState().chats as IChatListItemProps[]).filter((item: IChatListItemProps) => item.id !== chatId)]);
+		this.getChats()
 	}
 
 	render() {
